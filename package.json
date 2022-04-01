@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/vunderkind/ceramic-sandbox/issues"
   },
-  "homepage": "https://github.com/vunderkind/ceramic-sandbox#readme"
+  "homepage": "https://github.com/vunderkind/ceramic-sandbox#readme",
+  "dependencies": {
+    "@ceramicnetwork/http-client": "^1.5.7"
+  }
 }
