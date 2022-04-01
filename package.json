@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/vunderkind/ceramic-sandbox#readme",
   "dependencies": {
-    "@ceramicnetwork/http-client": "^1.5.7"
+    "@ceramicnetwork/3id-did-resolver": "^1.4.16",
+    "@ceramicnetwork/http-client": "^1.5.7",
+    "key-did-resolver": "^1.4.4"
   }
 }
