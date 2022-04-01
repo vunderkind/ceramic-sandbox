@@ -20,6 +20,7 @@
   "dependencies": {
     "@ceramicnetwork/3id-did-resolver": "^1.4.16",
     "@ceramicnetwork/http-client": "^1.5.7",
+    "dids": "^2.4.3",
     "key-did-resolver": "^1.4.4"
   }
 }
