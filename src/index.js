@@ -1,19 +1,47 @@
-const { CeramicClient } = require('@ceramicnetwork/http-client');
-const KeyDidResolver = require('key-did-resolver');
-const ThreeIdResolver = require('@ceramicnetwork/3id-did-resolver');
-const { DID } = require('dids');
+import { CeramicClient } from '@ceramicnetwork/http-client'
+import { DID } from 'dids'
+import { getResolver as getKeyResolver } from 'key-did-resolver'
+import { getResolver as get3IDResolver } from '@ceramicnetwork/3id-did-resolver'
+import { EthereumAuthProvider, ThreeIdConnect } from '@3id/connect'
 
-// const LOCAL_API_URL = 'http://localhost:7007';
-const FREE_API_URL = 'https://gateway-clay.ceramic.network';
+// Create a ThreeIdConnect connect instance as soon as possible in your app to start loading assets
+const threeID = new ThreeIdConnect()
 
-const ceramic = new CeramicClient(FREE_API_URL);
+async function authenticateWithEthereum(ethereumProvider) {
+  // Request accounts from the Ethereum provider
+  const accounts = await ethereumProvider.request({
+    method: 'eth_requestAccounts',
+  })
+  // Create an EthereumAuthProvider using the Ethereum provider and requested account
+  const authProvider = new EthereumAuthProvider(ethereumProvider, accounts[0])
+  // Connect the created EthereumAuthProvider to the 3ID Connect instance so it can be used to
+  // generate the authentication secret
+  await threeID.connect(authProvider)
 
-const resolver = {
-    ...KeyDidResolver.getResolver(),
-    ...ThreeIdResolver.getResolver(ceramic),
-};
+  const ceramic = new CeramicClient()
+  const did = new DID({
+    // Get the DID provider from the 3ID Connect instance
+    provider: threeID.getDidProvider(),
+    resolver: {
+      ...get3IDResolver(ceramic),
+      ...getKeyResolver(),
+    },
+  })
 
-const did = new DID({ resolver });
+  // Authenticate the DID using the 3ID provider from 3ID Connect, this will trigger the
+  // authentication flow using 3ID Connect and the Ethereum provider
+  await did.authenticate()
 
-ceramic.did = did;
+  // The Ceramic client can create and update streams using the authenticated DID
+  ceramic.did = did
+}
 
+// When using extensions such as MetaMask, an Ethereum provider may be injected as `window.ethereum`
+async function tryAuthenticate() {
+  if (window.ethereum == null) {
+    throw new Error('No injected Ethereum provider')
+  }
+  await authenticateWithEthereum(window.ethereum)
+}
+
+console.log('did it work?')
